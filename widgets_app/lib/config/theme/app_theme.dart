@@ -4,7 +4,7 @@ const colorLists = <Color>[
   Colors.blue,
   Colors.tealAccent,
   Colors.yellowAccent,
-  Colors.redAccent,
+  Color.fromARGB(255, 255, 0, 0),
   Colors.purple,
   Colors.orange,
   Colors.black38,
