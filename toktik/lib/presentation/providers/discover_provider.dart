@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:toktik/domain/datasources/video_posts_datasource.dart';
 import 'package:toktik/domain/entities/video_post.dart';
 import 'package:toktik/domain/repositories/video_posts_repository.dart';
 // import 'package:toktik/infrastructure/models/local_video_model.dart';
 // import 'package:toktik/shared/data/local_video_posts.dart';
 
 class DiscoverProvider extends ChangeNotifier {
-
   final VideoPostsRepositoriy videosRepository;
 
   // TODO: Respository, DataSource
@@ -14,9 +12,7 @@ class DiscoverProvider extends ChangeNotifier {
   bool initialLoading = true;
   List<VideoPost> videos = [];
 
-  DiscoverProvider({
-    required this.videosRepository
-  });
+  DiscoverProvider({required this.videosRepository});
 
   Future<void> loadNextPage() async {
     await Future.delayed(Duration(seconds: 2));
