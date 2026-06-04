@@ -42,4 +42,11 @@ const appMenuItems = <MenuItem>[
     link: '/snackbar',
     icon: Icons.info_outline,
   ),
+
+  MenuItem(
+    title: 'Animated Container',
+    subtitle: 'Contenedor Animado',
+    link: '/animated',
+    icon: Icons.animation,
+  ),
 ];

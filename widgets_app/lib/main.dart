@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
       title: 'Widgets App',
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme(selectedColor: 4).getTheme(),
+      theme: AppTheme(selectedColor: 1).getTheme(),
     );
   }
 }
