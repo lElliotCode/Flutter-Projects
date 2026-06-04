@@ -23,7 +23,7 @@ class _HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.all(8),
-      itemCount: 3,
+      itemCount: 4,
       itemBuilder: (BuildContext context, int index) {
         final menuItem = appMenuItems[index];
 
