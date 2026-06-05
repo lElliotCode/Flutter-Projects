@@ -9,7 +9,7 @@ const colorLists = <Color>[
   Colors.orange,
   Colors.black38,
   Colors.limeAccent,
-  Colors.lightBlue,
+  Colors.deepOrangeAccent,
   Colors.brown,
 ];
 
@@ -23,12 +23,9 @@ class AppTheme {
         'Select color must be less than ${colorLists.length}',
       );
 
-  ThemeData getTheme() =>
-      ThemeData(
-        useMaterial3: true, 
-        colorSchemeSeed: colorLists[selectedColor],
-        appBarTheme: AppBarTheme(
-          centerTitle: false,
-        )
-      );
+  ThemeData getTheme() => ThemeData(
+    useMaterial3: true,
+    colorSchemeSeed: colorLists[selectedColor],
+    appBarTheme: AppBarTheme(centerTitle: false),
+  );
 }
