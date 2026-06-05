@@ -50,7 +50,6 @@ class _InfiniteScrollScreenState extends State<InfiniteScrollScreen> {
     if (!isMounted) return;
     setState(() {});
 
-    // TODO: mover scroll
     moveScrollToBottom();
   }
 
@@ -101,20 +100,9 @@ class _InfiniteScrollScreenState extends State<InfiniteScrollScreen> {
           onRefresh: onRefresh,
           edgeOffset: 20,
           strokeWidth: 2,
-          child: ListView.builder(
-            controller: scrollController,
-            itemCount: imagesIds.length,
-            itemBuilder: (context, index) {
-              return FadeInImage(
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 300,
-                placeholder: AssetImage('assets/images/jar-loading.gif'),
-                image: NetworkImage(
-                  'https://picsum.photos/id/${imagesIds[index]}/500/300',
-                ),
-              );
-            },
+          child: _ListViewer(
+            scrollController: scrollController,
+            imagesIds: imagesIds,
           ),
         ),
       ),
@@ -128,6 +116,32 @@ class _InfiniteScrollScreenState extends State<InfiniteScrollScreen> {
               )
             : FadeIn(child: Icon(Icons.arrow_back)),
       ),
+    );
+  }
+}
+
+class _ListViewer extends StatelessWidget {
+  const _ListViewer({required this.scrollController, required this.imagesIds});
+
+  final ScrollController scrollController;
+  final List<int> imagesIds;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: imagesIds.length,
+      itemBuilder: (context, index) {
+        return FadeInImage(
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: 300,
+          placeholder: AssetImage('assets/images/jar-loading.gif'),
+          image: NetworkImage(
+            'https://picsum.photos/id/${imagesIds[index]}/500/300',
+          ),
+        );
+      },
     );
   }
 }
