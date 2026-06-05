@@ -26,6 +26,9 @@ enum Transportation { car, plane, boat, submarine }
 class _UIControlsViewState extends State<_UIControlsView> {
   bool isDeveloper = true;
   Transportation selectedTransportation = Transportation.car;
+  bool wantsBreakfast = false;
+  bool wantsLunch = false;
+  bool wantsDinner = false;
 
   @override
   Widget build(BuildContext context) {
@@ -47,75 +50,90 @@ class _UIControlsViewState extends State<_UIControlsView> {
           title: Text('Expansion Tile'),
           subtitle: Text('Subtitulo'),
           children: [
-            ListTile(title: Text('Item 1')),
-            ListTile(title: Text('Item 2')),
-            ListTile(title: Text('Item 3')),
+            RadioListTile(
+              title: Text('Car'),
+              subtitle: Text('Travel in a car'),
+              value: Transportation.car,
+              // ignore: deprecated_member_use
+              groupValue: selectedTransportation,
+              // ignore: deprecated_member_use
+              onChanged: (value) {
+                setState(() {
+                  selectedTransportation = Transportation.car;
+                });
+              },
+            ),
+            RadioListTile(
+              title: Text('Boat'),
+              subtitle: Text('Travel in a boat'),
+              value: Transportation.boat,
+              // ignore: deprecated_member_use
+              groupValue: selectedTransportation,
+              // ignore: deprecated_member_use
+              onChanged: (value) {
+                setState(() {
+                  selectedTransportation = Transportation.boat;
+                });
+              },
+            ),
+
+            RadioListTile(
+              title: Text('Plane'),
+              subtitle: Text('Travel in a plane'),
+              value: Transportation.plane,
+              // ignore: deprecated_member_use
+              groupValue: selectedTransportation,
+              // ignore: deprecated_member_use
+              onChanged: (value) {
+                setState(() {
+                  selectedTransportation = Transportation.plane;
+                });
+              },
+            ),
+
+            RadioListTile(
+              title: Text('Submarine'),
+              subtitle: Text('Travel in a submarine'),
+              value: Transportation.submarine,
+              // ignore: deprecated_member_use
+              groupValue: selectedTransportation,
+              // ignore: deprecated_member_use
+              onChanged: (value) {
+                setState(() {
+                  selectedTransportation = Transportation.submarine;
+                });
+              },
+            ),
           ],
         ),
 
-        RadioListTile(
-          title: Text('Car'),
-          subtitle: Text('Subtitulo pues'),
-          value: Transportation.car,
-          // ignore: deprecated_member_use
-          groupValue: selectedTransportation,
-          // ignore: deprecated_member_use
-          onChanged: (value) {
-            setState(() {
-              selectedTransportation = Transportation.car;
-            });
-          },
-        ),
-
-        RadioListTile(
-          title: Text('Boat'),
-          subtitle: Text('Subtitulo pues'),
-          value: Transportation.boat,
-          // ignore: deprecated_member_use
-          groupValue: selectedTransportation,
-          // ignore: deprecated_member_use
-          onChanged: (value) {
-            setState(() {
-              selectedTransportation = Transportation.boat;
-            });
-          },
-        ),
-
-        RadioListTile(
-          title: Text('Plane'),
-          subtitle: Text('Subtitulo pues'),
-          value: Transportation.plane,
-          // ignore: deprecated_member_use
-          groupValue: selectedTransportation,
-          // ignore: deprecated_member_use
-          onChanged: (value) {
-            setState(() {
-              selectedTransportation = Transportation.plane;
-            });
-          },
-        ),
-
-        RadioListTile(
-          title: Text('Submarine'),
-          subtitle: Text('Subtitulo pues'),
-          value: Transportation.submarine,
-          // ignore: deprecated_member_use
-          groupValue: selectedTransportation,
-          // ignore: deprecated_member_use
-          onChanged: (value) {
-            setState(() {
-              selectedTransportation = Transportation.submarine;
-            });
-          },
-        ),
-
         CheckboxListTile(
-          title: Text('Checkbox List Tile'),
-          subtitle: Text('Subtitulo'),
-          value: isDeveloper,
+          title: Text('Breakfast'),
+          subtitle: Text('¿Desea recibir desayuno?'),
+          value: wantsBreakfast,
           onChanged: (value) {
             setState(() {
-              isDeveloper = !isDeveloper;
+              wantsBreakfast = !wantsBreakfast;
+            });
+          },
+        ),
+        CheckboxListTile(
+          title: Text('Lunch'),
+          subtitle: Text('¿Desea recibir almuerzo?'),
+          value: wantsLunch,
+          onChanged: (value) {
+            setState(() {
+              wantsLunch = !wantsLunch;
+            });
+          },
+        ),
+        CheckboxListTile(
+          title: Text('Dinner'),
+          subtitle: Text('¿Desea recibir cena?'),
+          value: wantsDinner,
+          onChanged: (value) {
+            setState(() {
+              wantsDinner = !wantsDinner;
             });
           },
         ),
