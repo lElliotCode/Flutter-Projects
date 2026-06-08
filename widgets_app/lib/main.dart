@@ -5,11 +5,7 @@ import 'package:widgets_app/presentation/providers/theme_provider.dart';
 import 'config/theme/app_theme.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MainApp(),
-    )
-  );
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends ConsumerWidget {
@@ -17,16 +13,16 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // final bool isDark = ref.watch(isDarkModeProvider);
+    // final int selectedColorTheme = ref.watch(selectedColorProvider);
 
-    final bool isDark = ref.watch(isDarkModeProvider);
-    final int selectedColorTheme = ref.watch(selectedColorProvider);
-
+    final AppTheme appTheme = ref.watch(themeNotifierProvider);
 
     return MaterialApp.router(
       title: 'Widgets App',
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme(selectedColor: selectedColorTheme, isDarkMode: isDark).getTheme(),
+      theme: appTheme.getTheme(),
     );
   }
 }
