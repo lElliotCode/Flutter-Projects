@@ -1,4 +1,3 @@
-
 import 'package:cinemapedia/config/constants/environment.dart';
 import 'package:cinemapedia/domain/datasources/movies_datasource.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
@@ -7,30 +6,24 @@ import 'package:cinemapedia/infrastructure/models/moviedb/moviedb_response.dart'
 import 'package:dio/dio.dart';
 
 class MoviedbDatasource extends MoviesDatasource {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://api.themoviedb.org/3',
-        queryParameters: {
-          'api_key': Environment.movieDBKey,
-          'language': 'es-AR'
-        }
-      )
-    );
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: 'https://api.themoviedb.org/3/',
+      queryParameters: {'api_key': Environment.movieDBKey, 'language': 'es-AR'},
+    ),
+  );
 
   @override
   Future<List<Movie>> getOnBillboard({int page = 1}) async {
-
     final response = await dio.get('movie/now_playing');
-  
-    final movieDBResponse =  MovieDbResponse.fromJson(response.data);
+
+    final movieDBResponse = MovieDbResponse.fromJson(response.data);
 
     final List<Movie> movies = movieDBResponse.results
-    .where((e) => e.backdropPath != 'not-found')
-    .map(
-      (moviedb) => MovieMapper.movieDBToEntity(moviedb),
-    ).toList(); 
+        .where((e) => e.backdropPath != 'not-found')
+        .map((moviedb) => MovieMapper.movieDBToEntity(moviedb))
+        .toList();
 
     return movies;
   }
-
 }
