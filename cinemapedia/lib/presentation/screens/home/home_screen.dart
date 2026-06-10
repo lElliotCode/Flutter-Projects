@@ -1,8 +1,8 @@
 // import 'package:cinemapedia/config/constants/environment.dart';
-import 'package:cinemapedia/presentation/screens/providers/movies/initial_loading_provider.dart';
-import 'package:cinemapedia/presentation/screens/providers/movies/movies_providers.dart';
-import 'package:cinemapedia/presentation/screens/providers/movies/movies_slideshow_provider.dart';
-import 'package:cinemapedia/presentation/screens/widgets/widgets.dart';
+import 'package:cinemapedia/presentation/providers/movies/initial_loading_provider.dart';
+import 'package:cinemapedia/presentation/providers/movies/movies_providers.dart';
+import 'package:cinemapedia/presentation/providers/movies/movies_slideshow_provider.dart';
+import 'package:cinemapedia/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
