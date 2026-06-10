@@ -8,14 +8,14 @@ class CustomAppbar extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleMedium;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: SizedBox(
-        width: double.infinity,
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 25, right: 10),
         child: Row(
           children: [
             Icon(Icons.movie_creation_outlined, color: colors.primary),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
             Text('Cinemapedia', style: titleStyle),
 
             const Spacer(),
