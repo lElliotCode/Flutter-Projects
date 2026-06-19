@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CustomBottomNavigation extends StatelessWidget {
-  const CustomBottomNavigation({super.key});
+  final int currentIndex;
+  const CustomBottomNavigation({super.key, required this.currentIndex});
 
   @override
   Widget build(BuildContext context) {

@@ -3,12 +3,15 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/screens/screens.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/home/0',
   routes: [
     GoRoute(
-      path: '/',
+      path: '/home/:view',
       name: HomeScreen.name,
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) {
+        final pageIndex = state.pathParameters['view'] ?? '0';
+        return HomeScreen(pageIndex: int.parse(pageIndex));
+      },
       routes: [
         //**Child Routes */
         GoRoute(
