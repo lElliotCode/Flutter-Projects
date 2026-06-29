@@ -3,6 +3,7 @@ import 'package:cinemapedia/config/helpers/human_format.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
 import 'package:cinemapedia/presentation/providers/movies/movie_detail_provider.dart';
 import 'package:cinemapedia/presentation/providers/providers.dart';
+import 'package:cinemapedia/presentation/providers/storage/isfavorite_movie_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -166,19 +167,41 @@ class _MovieDetails extends StatelessWidget {
   }
 }
 
-class _CustomSliverAppbar extends StatelessWidget {
+class _CustomSliverAppbar extends ConsumerWidget {
   final Movie movie;
 
   const _CustomSliverAppbar({required this.movie});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
+    final isFavoriteFuture = ref.watch(isFavoriteMovieProvider(movie.id));
 
     return SliverAppBar(
       backgroundColor: Colors.black,
       expandedHeight: size.height * 0.7,
       foregroundColor: Colors.white,
+
+      actions: [
+        IconButton(
+          onPressed: () async {
+            await ref
+                .read(favoriteMoviesProvider.notifier)
+                .toggleFavoriteMovie(movie);
+            ref.invalidate(isFavoriteMovieProvider(movie.id));
+          },
+          icon: isFavoriteFuture.when(
+            data: (isFavorite) => isFavorite
+                ? const Icon(Icons.favorite_rounded, color: Colors.red)
+                : const Icon(Icons.favorite_border_rounded),
+            error: (_, _) => throw Exception('Error al cargar favoritos'),
+            loading: () => const CircularProgressIndicator(strokeWidth: 2),
+          ),
+          // icon: const Icon(Icons.favorite_border_rounded),
+          // icon: const Icon(Icons.favorite_rounded, color: Colors.red),
+        ),
+      ],
+
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: const EdgeInsets.only(left: 10, bottom: 10),
         // title: Text(
@@ -194,29 +217,22 @@ class _CustomSliverAppbar extends StatelessWidget {
               ),
             ),
 
-            const SizedBox.expand(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    stops: [0.0, 0.2],
-                    colors: [Colors.black54, Colors.transparent],
-                  ),
-                ),
-              ),
+            const _CustomGradient(
+              begin: Alignment.bottomCenter,
+              stops: [0.0, 0.1],
+              colors: [Colors.black38, Colors.transparent],
             ),
 
-            const SizedBox.expand(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    stops: [0.0, 0.4],
-                    colors: [Colors.black54, Colors.transparent],
-                  ),
-                ),
-              ),
+            const _CustomGradient(
+              begin: Alignment.topLeft,
+              stops: [0.0, 0.3],
+              colors: [Colors.black54, Colors.transparent],
+            ),
+
+            const _CustomGradient(
+              begin: Alignment.topRight,
+              stops: [0.0, 0.3],
+              colors: [Colors.black54, Colors.transparent],
             ),
           ],
         ),
@@ -299,6 +315,35 @@ class _ActorsByMovie extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CustomGradient extends StatelessWidget {
+  final AlignmentGeometry begin;
+  final AlignmentGeometry end;
+  final List<double> stops;
+  final List<Color> colors;
+
+  const _CustomGradient({
+    required this.begin,
+    required this.stops,
+    required this.colors,
+  }) : end = const Alignment(0, 0);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: begin,
+            end: end,
+            stops: stops,
+            colors: colors,
+          ),
+        ),
       ),
     );
   }
