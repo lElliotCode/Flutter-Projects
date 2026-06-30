@@ -25,6 +25,20 @@ class HomeScreen extends StatelessWidget {
               context.push('/bloc');
             },
           ),
+
+          const Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 10), 
+            child: Divider()
+          ),
+
+          ListTile(
+            title: const Text('Nuevo Usuario'),
+            subtitle: const Text('Manejo de Formularios'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              context.push('/new-user');
+            },
+          ),
         ],
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:form_app/presentation/screens/BLoCs/counter_bloc/counter_bloc.dart';
+import 'package:form_app/presentation/BLoCs/counter_bloc/counter_bloc.dart';
 
 class BlocCounterScreen extends StatelessWidget {
   const BlocCounterScreen({super.key});
