@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:form_app/presentation/BLoCs/register_cubit/register_cubit.dart';
 import 'package:form_app/presentation/widgets/widgets.dart';
 
 final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
@@ -9,8 +11,11 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nuevo Uusario')),
-      body: const _RegisterView(),
+      appBar: AppBar(title: const Text('Nuevo Usuario')),
+      body: BlocProvider(
+        create: (context) => RegisterCubit(),
+        child: const _RegisterView(),
+      ),
     );
   }
 }
@@ -31,25 +36,18 @@ class _RegisterView extends StatelessWidget {
   }
 }
 
-class _RegisterForm extends StatefulWidget {
+class _RegisterForm extends StatelessWidget {
   const _RegisterForm();
-
-  @override
-  State<_RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<_RegisterForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String username = '';
-  String email = '';
-  String password = '';
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final registerCubit = context.watch<RegisterCubit>();
+    final username = registerCubit.state.username;
+    final password = registerCubit.state.password;
+    final email = registerCubit.state.email;
 
     return Form(
-      key: _formKey,
       child: Column(
         children: [
           const SizedBox(height: 25),
@@ -62,14 +60,8 @@ class _RegisterFormState extends State<_RegisterForm> {
               Icons.supervised_user_circle_outlined,
               color: colors.tertiaryFixedDim,
             ),
-            onChanged: (value) => username = value,
-            validator: (value) {
-              if (value == null || value.isEmpty || value.trim().isEmpty) {
-                return 'This field is required';
-              }
-              if (value.length < 6) return 'Should have at least 6 characters';
-              return null;
-            },
+            onChanged: registerCubit.usernameChange,
+            errorMessage: username.errorMessage
           ),
 
           const SizedBox(height: 15),
@@ -82,14 +74,8 @@ class _RegisterFormState extends State<_RegisterForm> {
               Icons.attach_email_outlined,
               color: colors.tertiaryFixedDim,
             ),
-            onChanged: (value) => email = value,
-            validator: (value) {
-              if (value == null || value.isEmpty || value.trim().isEmpty) {
-                return 'This field is required';
-              }
-              if (!emailRegExp.hasMatch(value)) return 'Incorrect format';
-              return null;
-            },
+            onChanged: registerCubit.emailChange,
+            errorMessage: email.errorMessage,
           ),
 
           const SizedBox(height: 15),
@@ -99,24 +85,18 @@ class _RegisterFormState extends State<_RegisterForm> {
             // errorMessage: 'Este campo es requerido',
             obscureText: true,
             prefixIcon: Icon(Icons.password, color: colors.tertiaryFixedDim),
-            onChanged: (value) => password = value,
-            validator: (value) {
-              if (value == null || value.isEmpty || value.trim().isEmpty) {
-                return 'This field is required';
-              }
-              if (value.length < 6) return 'Should have at least 6 characters';
-              return null;
-            },
+            onChanged: registerCubit.passwordChange,
+            errorMessage: password.errorMessage,
           ),
+
+          const SizedBox(height: 15),
 
           FilledButton.tonalIcon(
             onPressed: () {
-              final isValid = _formKey.currentState!.validate();
-              if (!isValid) return;
-              print('$username, $email, $password');
+              registerCubit.onSubmit();
             },
             label: const Text('Save new User'),
-            icon: const Icon(Icons.save_alt_outlined),
+            icon: const Icon(Icons.supervised_user_circle),
           ),
         ],
       ),
