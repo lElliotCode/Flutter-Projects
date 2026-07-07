@@ -27,6 +27,57 @@ class MainApp extends StatelessWidget {
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
       theme: AppTheme().getTheme(),
+      builder: (context, child) =>
+          HandleNotificationInteractions(child: child!),
     );
+  }
+}
+
+class HandleNotificationInteractions extends StatefulWidget {
+  final Widget child;
+  const HandleNotificationInteractions({super.key, required this.child});
+
+  @override
+  State<HandleNotificationInteractions> createState() =>
+      _HandleNotificationInteractionsState();
+}
+
+class _HandleNotificationInteractionsState
+    extends State<HandleNotificationInteractions> {
+  Future<void> setupInteractedMessage() async {
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    context.read<NotificationsBloc>().handleRemoteMessage(message);
+
+    final messageId = message.messageId
+        ?.replaceAll(':', '')
+        .replaceAll('%', '');
+
+    appRouter.push('/push-details/$messageId');
+
+    // if (message.data['type'] == 'chat') {
+    //   Navigator.pushNamed(context, '/chat', arguments: ChatArguments(message));
+    // }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    setupInteractedMessage();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
