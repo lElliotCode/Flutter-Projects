@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:widgets_app/config/menu/menu_item.dart';
+import 'package:widgets_app/presentation/widgets/side_menu.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(title: Text('Flutter + Material 3')),
       body: appMenuItems.isNotEmpty
           ? _HomeView()
           : Center(child: Text('No se encontraron datos')),
+      drawer: SideMenu(scaffoldKey: scaffoldKey),
     );
   }
 }
@@ -57,7 +62,6 @@ class _CustomListTile extends StatelessWidget {
         //         : CardsScreen(),
         //   )
         // );
-
         context.push(menuItem.link);
       },
     );

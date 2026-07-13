@@ -1,0 +1,4 @@
+{
+    "terminal.integrated.tabs.allowAgentCliTitle": true,
+    "terminal.integrated.tabs.defaultIcon": "ellipsis"
+}

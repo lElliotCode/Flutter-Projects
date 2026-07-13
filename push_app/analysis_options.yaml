@@ -1,0 +1,13 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # 1. ALERTAS PARA EL USO DE CONST
+    - prefer_const_constructors           # Te pide 'const' en constructores cuando es posible
+    - prefer_const_declarations           # Te pide 'const' en variables locales que no cambian
+    - prefer_const_constructors_in_immutables # Te obliga a poner 'const' en los constructores de tus propios Widgets
+    - prefer_const_literals_to_create_immutables # Te pide 'const' en listas/maps dentro de constructores constantes
+
+    # 2. EXTRAS DE BUENAS PRÁCTICAS MUY RECOMENDADOS
+    - avoid_print                         # Te clava un warning si dejás un 'print' colgado en producción
+    - prefer_final_fields                 # Te avisa si una propiedad de una clase puede ser final
