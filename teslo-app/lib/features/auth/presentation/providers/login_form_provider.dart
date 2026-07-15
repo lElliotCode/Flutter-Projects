@@ -1,22 +1,31 @@
 // import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
+import 'package:teslo_shop/features/auth/presentation/providers/providers.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
 
 // ! 3 - StateNotifierProvider - para consumir afuera
 final loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
-  return LoginFormNotifier();
+  final loginUserCallback = ref.watch(authProvider.notifier).loginUser;
+
+  return LoginFormNotifier(loginUserCallback: loginUserCallback);
 });
 
 // ! 2 - Cómo implementamos el notifier
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
-  LoginFormNotifier() : super(LoginFormState());
+  final Function(String, String) loginUserCallback;
+
+  LoginFormNotifier({
+    required this.loginUserCallback
+  }) : super(LoginFormState());
 
   onEmailChange(String value) {
     final newEmail = Email.dirty(value);
     state = state.copyWith(
-        email: newEmail, isValid: Formz.validate([newEmail, state.password]));
+      email: newEmail, 
+      isValid: Formz.validate([newEmail, state.password])
+    );
   }
 
   onPasswordChange(String value) {
@@ -26,12 +35,13 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
         isValid: Formz.validate([newPassword, state.email]));
   }
 
-  onFormSubmit() {
+  onFormSubmit() async {
     _touchEveryField();
 
     if (!state.isValid) return;
 
-    print(state);
+    await loginUserCallback(state.email.value, state.password.value);
+
   }
 
   _touchEveryField() {
@@ -55,20 +65,20 @@ class LoginFormState {
   final Email email;
   final Password password;
 
-  LoginFormState(
-      {this.isPosting = false,
-      this.isFormPosted = false,
-      this.isValid = false,
-      this.email = const Email.pure(),
-      this.password = const Password.pure()});
+  LoginFormState({
+    this.isPosting = false,
+    this.isFormPosted = false,
+    this.isValid = false,
+    this.email = const Email.pure(),
+    this.password = const Password.pure()
+  });
 
-  LoginFormState copyWith(
-          {bool? isPosting,
-          bool? isFormPosted,
-          bool? isValid,
-          Email? email,
-          Password? password}) =>
-      LoginFormState(
+  LoginFormState copyWith({
+    bool? isPosting,
+    bool? isFormPosted,
+    bool? isValid,
+    Email? email,
+    Password? password}) => LoginFormState(
         isPosting: isPosting ?? this.isPosting,
         isFormPosted: isFormPosted ?? this.isFormPosted,
         isValid: isValid ?? this.isValid,
@@ -88,4 +98,3 @@ class LoginFormState {
     ''';
   }
 }
-
