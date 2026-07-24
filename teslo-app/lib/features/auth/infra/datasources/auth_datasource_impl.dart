@@ -4,12 +4,31 @@ import 'package:teslo_shop/features/auth/domain/domain.dart';
 import 'package:teslo_shop/features/auth/infra/infrastructure.dart';
 
 class AuthDatasourceImpl extends AuthDatasource {
-  final dio = Dio(BaseOptions(baseUrl: Environment.apiUrl));
+  final dio = Dio(BaseOptions(
+      baseUrl: Environment.apiUrl, contentType: 'application/json'));
 
   @override
-  Future<User> checkAuthStatus(String token) {
-    // TODO: implement checkAuthStatus
-    throw UnimplementedError();
+  Future<User> checkAuthStatus(String token) async {
+    try {
+      final response = await dio.get('/auth/check-status',
+          options: Options(headers: {'Authorization': 'Bearer $token'}));
+
+      final user = UserMapper.userJsonToEntity(response.data);
+      return user;
+      
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
+        throw CustomError('Invalid Token');
+      }
+
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw CustomError(e.response?.data['message'] ?? 'Connection Timeout ');
+      }
+
+      throw Exception('Error no controlado de red o servidor');
+    } catch (e) {
+      throw Exception('Error desconocido al iniciar sesión: ${e.toString()}');
+    }
   }
 
   @override
@@ -21,23 +40,32 @@ class AuthDatasourceImpl extends AuthDatasource {
       final user = UserMapper.userJsonToEntity(response.data);
       return user;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw CustomError(
-            e.response?.data['message'] ?? 'Credenciales incorrectas', 1);
-      }
-      if (e.type == DioExceptionType.connectionTimeout) {
-        throw ConnectionTimeout();
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
+        throw CustomError(e.response?.data['message'] ?? 'Invalid Credentials');
       }
 
-      throw CustomError('Something goes worng', 1);
-    } catch (_) {
-      throw CustomError('Something goes worng', 2);
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw CustomError(e.response?.data['message'] ?? 'Connection Timeout ');
+      }
+
+      throw Exception('Error no controlado de red o servidor');
+    } catch (e) {
+      throw Exception('Error desconocido al iniciar sesión: ${e.toString()}');
     }
   }
 
   @override
-  Future<User> register(String email, String password, String fullName) {
-    // TODO: implement register
-    throw UnimplementedError();
+  Future<User> register(String email, String password, String fullName) async {
+    try {
+      final response = await dio.post('auth/register', data: {
+        'email': email,
+        'password': password,
+        'fullName': fullName,
+      });
+      final user = UserMapper.userJsonToEntity(response.data);
+      return user;
+    } catch (e) {
+      throw Exception();
+    }
   }
 }

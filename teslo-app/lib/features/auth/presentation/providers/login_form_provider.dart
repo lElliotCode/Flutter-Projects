@@ -16,16 +16,13 @@ final loginFormProvider =
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
   final Function(String, String) loginUserCallback;
 
-  LoginFormNotifier({
-    required this.loginUserCallback
-  }) : super(LoginFormState());
+  LoginFormNotifier({required this.loginUserCallback})
+      : super(LoginFormState());
 
   onEmailChange(String value) {
     final newEmail = Email.dirty(value);
     state = state.copyWith(
-      email: newEmail, 
-      isValid: Formz.validate([newEmail, state.password])
-    );
+        email: newEmail, isValid: Formz.validate([newEmail, state.password]));
   }
 
   onPasswordChange(String value) {
@@ -40,8 +37,11 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
     if (!state.isValid) return;
 
+    state = state.copyWith(isPosting: true);
+
     await loginUserCallback(state.email.value, state.password.value);
 
+    state = state.copyWith(isPosting: false);
   }
 
   _touchEveryField() {
@@ -65,20 +65,20 @@ class LoginFormState {
   final Email email;
   final Password password;
 
-  LoginFormState({
-    this.isPosting = false,
-    this.isFormPosted = false,
-    this.isValid = false,
-    this.email = const Email.pure(),
-    this.password = const Password.pure()
-  });
+  LoginFormState(
+      {this.isPosting = false,
+      this.isFormPosted = false,
+      this.isValid = false,
+      this.email = const Email.pure(),
+      this.password = const Password.pure()});
 
-  LoginFormState copyWith({
-    bool? isPosting,
-    bool? isFormPosted,
-    bool? isValid,
-    Email? email,
-    Password? password}) => LoginFormState(
+  LoginFormState copyWith(
+          {bool? isPosting,
+          bool? isFormPosted,
+          bool? isValid,
+          Email? email,
+          Password? password}) =>
+      LoginFormState(
         isPosting: isPosting ?? this.isPosting,
         isFormPosted: isFormPosted ?? this.isFormPosted,
         isValid: isValid ?? this.isValid,
