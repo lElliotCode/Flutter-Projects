@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:teslo_shop/features/products/domain/domain.dart';
 import 'package:teslo_shop/features/products/presentation/providers/providers.dart';
-import 'package:teslo_shop/features/shared/widgets/widgets.dart';
+import 'package:teslo_shop/features/shared/shared.dart';
 import 'package:teslo_shop/main.dart';
 
 class ProductScreen extends ConsumerWidget {
@@ -10,33 +13,85 @@ class ProductScreen extends ConsumerWidget {
 
   const ProductScreen({super.key, required this.productId});
 
+  void showSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Producto Actualizado')));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productState = ref.watch(productProvider(productId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar'),
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.camera))],
-      ),
-      body: productState.isLoading
-      ? const FullScreenLoader()
-      : _ProductView(product: productState.product! ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.save_as_outlined),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Editar Producto'),
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  final String? imagePath =
+                      await CameraGalleryServiceImpl().selectPhoto();
+
+                  if (imagePath == null) return;
+                  if (productState.product == null) return;
+                  ref
+                      .read(productFormProvider(productState.product!).notifier)
+                      .updateProductImage(imagePath);
+
+                  logger.i(imagePath);
+                },
+                icon: const Icon(Icons.photo_library_outlined)),
+            IconButton(
+                onPressed: () async {
+                  final String? imagePath =
+                      await CameraGalleryServiceImpl().takePhoto();
+
+                  if (imagePath == null) return;
+                  if (productState.product == null) return;
+                  ref
+                      .read(productFormProvider(productState.product!).notifier)
+                      .updateProductImage(imagePath);
+
+                  logger.i(imagePath);
+                },
+                icon: const Icon(Icons.camera))
+          ],
+        ),
+        body: productState.isLoading
+            ? const FullScreenLoader()
+            : _ProductView(product: productState.product!),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            FocusScope.of(context).unfocus();
+            if (productState.product == null) return;
+
+            ref
+                .read(productFormProvider(productState.product!).notifier)
+                .onFormSubmit()
+                .then((value) {
+              if (!value) return;
+              // ignore: use_build_context_synchronously
+              showSnackbar(context);
+            });
+          },
+          child: const Icon(Icons.save_as_outlined),
+        ),
       ),
     );
   }
 }
 
-class _ProductView extends StatelessWidget {
+class _ProductView extends ConsumerWidget {
   final Product product;
 
   const _ProductView({required this.product});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final productForm = ref.watch(productFormProvider(product));
+
     final textStyles = Theme.of(context).textTheme;
 
     return ListView(
@@ -44,10 +99,18 @@ class _ProductView extends StatelessWidget {
         SizedBox(
           height: 250,
           width: 600,
-          child: _ImageGallery(images: product.images),
+          child: _ImageGallery(images: productForm.images),
         ),
         const SizedBox(height: 10),
-        Center(child: Text(product.title, style: textStyles.titleSmall)),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          child: Center(
+              child: Text(
+            productForm.title.value,
+            style: textStyles.titleSmall,
+            textAlign: TextAlign.center,
+          )),
+        ),
         const SizedBox(height: 10),
         _ProductInformation(product: product)
       ],
@@ -61,6 +124,8 @@ class _ProductInformation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final productForm = ref.watch(productFormProvider(product));
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -71,27 +136,54 @@ class _ProductInformation extends ConsumerWidget {
         CustomProductField(
           isTopField: true,
           label: 'Nombre',
-          initialValue: product.title,
-        ), 
-        CustomProductField(
-          label: 'Slug',
-          initialValue: product.slug,
+          initialValue: productForm.title.value,
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onTitleChanged(value);
+          },
+          errorMessage: productForm.title.errorMessage,
         ),
         CustomProductField(
-          isTopField: true,
+          label: 'Slug',
+          initialValue: productForm.slug.value,
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onSlugChanged(value);
+          },
+          errorMessage: productForm.slug.errorMessage,
+        ),
+        CustomProductField(
+          isTopField: false,
+          isBottomField: true,
           label: 'Precio',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          initialValue: product.price.toString(),
+          initialValue: productForm.price.value.toString(),
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onPriceChanged(double.tryParse(value) ?? -1);
+          },
+          errorMessage: productForm.price.errorMessage,
         ),
         const SizedBox(
           height: 15,
         ),
         const Text('Extras'),
-        _SizeSelector(selectedSizes: product.sizes),
+        _SizeSelector(
+          selectedSizes: productForm.sizes,
+          onSizesChanged:
+              ref.read(productFormProvider(product).notifier).onSizeChanged,
+        ),
         const SizedBox(
           height: 5,
         ),
-        _GenderSelector(selectedGender: product.gender),
+        _GenderSelector(
+          selectedGender: productForm.gender,
+          onGenderChanged:
+              ref.read(productFormProvider(product).notifier).onGenderChanged,
+        ),
         const SizedBox(
           height: 15,
         ),
@@ -99,13 +191,24 @@ class _ProductInformation extends ConsumerWidget {
           isTopField: true,
           label: 'Existencias',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          initialValue: product.stock.toString(),
+          initialValue: productForm.inStock.value.toString(),
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onStockChanged(int.tryParse(value) ?? -1);
+          },
+          errorMessage: productForm.inStock.errorMessage,
         ),
         CustomProductField(
           maxLines: 6,
           label: 'Descripción',
           keyboardType: TextInputType.multiline,
-          initialValue: product.description,
+          initialValue: productForm.description,
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onDescriptionChanged(value);
+          },
         ),
         CustomProductField(
           isBottomField: true,
@@ -113,6 +216,11 @@ class _ProductInformation extends ConsumerWidget {
           label: 'Tagas (Separados por coma)',
           keyboardType: TextInputType.multiline,
           initialValue: product.tags.join(', '),
+          onChanged: (value) {
+            ref
+                .read(productFormProvider(product).notifier)
+                .onTagsChanged(value);
+          },
         ),
         const SizedBox(
           height: 100,
@@ -126,12 +234,18 @@ class _SizeSelector extends StatelessWidget {
   final List<String> selectedSizes;
   final List<String> sizes = const ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
-  const _SizeSelector({required this.selectedSizes});
+  final Function(List<String> selectedSizes) onSizesChanged;
+
+  const _SizeSelector({
+    required this.selectedSizes,
+    required this.onSizesChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton(
+    return SegmentedButton<String>(
       showSelectedIcon: false,
+      emptySelectionAllowed: true,
       segments: sizes.map((size) {
         return ButtonSegment(
             value: size,
@@ -140,8 +254,11 @@ class _SizeSelector extends StatelessWidget {
               style: const TextStyle(fontSize: 10),
             ));
       }).toList(),
-      selected: Set.from(selectedSizes),
-      onSelectionChanged: (newSelection) => logger.e(newSelection),
+      selected: Set<String>.from(selectedSizes),
+      onSelectionChanged: (newSelection) {
+        FocusScope.of(context).unfocus();
+        onSizesChanged(List<String>.from(newSelection));
+      },
       multiSelectionEnabled: true,
     );
   }
@@ -152,7 +269,12 @@ class _GenderSelector extends StatelessWidget {
   final List<String> genders = const ['men', 'women', 'kid'];
   final List<IconData> genderIcons = const [Icons.man, Icons.woman, Icons.boy];
 
-  const _GenderSelector({required this.selectedGender});
+  final Function(String selectedGender) onGenderChanged;
+
+  const _GenderSelector({
+    required this.selectedGender,
+    required this.onGenderChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +293,10 @@ class _GenderSelector extends StatelessWidget {
               ));
         }).toList(),
         selected: {selectedGender},
-        onSelectionChanged: (newSelection) => logger.e(newSelection),
+        onSelectionChanged: (newSelection) {
+          FocusScope.of(context).unfocus();
+          onGenderChanged(newSelection.first);
+        },
       ),
     );
   }
@@ -183,27 +308,40 @@ class _ImageGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (images.isEmpty) {
+      return ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        child: Image.asset('assets/images/no-image.jpg', fit: BoxFit.cover),
+      );
+    }
+
     return PageView(
       scrollDirection: Axis.horizontal,
       controller: PageController(
         viewportFraction: 0.7,
-      ),
-      children: images.isEmpty
-          ? [
-              ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  child: Image.asset('assets/images/no-image.jpg',
-                      fit: BoxFit.cover))
-            ]
-          : images.map((e) {
-              return ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(20)),
-                child: Image.network(
-                  e,
-                  fit: BoxFit.cover,
-                ),
-              );
-            }).toList(),
+      ), 
+      children: images.map((img) {
+        late ImageProvider imageProvider;
+        if (img.startsWith('http')) {
+          imageProvider = NetworkImage(img);
+        } else {
+          imageProvider = FileImage(File(img));
+        }
+
+        // logger.e(imageProvider);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              child: FadeInImage(
+                fit: BoxFit.cover,
+                image: imageProvider,
+                placeholder:
+                    const AssetImage('assets/loaders/bottle-loader.gif'),
+              )),
+        );
+      }).toList(),
     );
   }
 }

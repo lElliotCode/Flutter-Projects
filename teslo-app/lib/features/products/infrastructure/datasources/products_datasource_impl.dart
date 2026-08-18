@@ -15,10 +15,75 @@ class ProductsDatasourceImpl extends ProductsDatasource {
             baseUrl: Environment.apiUrl,
             headers: {'Authorization': 'Bearer $accesToken'}));
 
+  // Una imagen ya subida llega como el nombre del archivo (sin separadores);
+  // una recién seleccionada llega como ruta local: '/data/.../pic.jpg' o 'C:\...\pic.jpg'
+  static final _pathSeparator = RegExp(r'[/\\]');
+
+  Future<List<String>> _uploadPhotos( List<String> photos) async {
+    final photosToUpload = photos.where((pic) => pic.contains(_pathSeparator)).toList();
+    final photosToIgnore = photos.where((pic) => !pic.contains(_pathSeparator)).toList();
+
+    final List<Future<String>> uploadJob = photosToUpload.map(_uploadFile).toList();
+    final newImages = await Future.wait(uploadJob);
+
+    return [...photosToIgnore, ...newImages]; //** y aca las newImages**
+  }
+
+  Future<String> _uploadFile( String path) async {
+    try {
+      final fileName = path.split(_pathSeparator).last;
+      final FormData data = FormData.fromMap({
+        'file': MultipartFile.fromFileSync(path, filename: fileName)
+      });
+
+      final response = await dio.post('/files/product', data: data);
+      return response.data['image'];
+
+    } on DioException catch (e) {
+      logger.e('Error subiendo imagen $path: ${e.response?.statusCode} ${e.response?.data}');
+      throw Exception();
+
+    } catch (e) {
+      logger.e(e);
+      throw Exception();
+    }
+  }
+
   @override
-  Future<Product> createUpdateProduct(Map<String, dynamic> productLike) {
-    // TODO: implement createUpdateProduct
-    throw UnimplementedError();
+  Future<Product> createUpdateProduct(Map<String, dynamic> productLike) async {
+    
+    try {
+
+      final String? productId = productLike['id'];
+      final String method = (productId == null) ? 'POST' : 'PATCH';
+      final String url = (productId == null) ? '/products' : '/products/$productId';
+
+      productLike.remove('id');
+      productLike['images'] = await _uploadPhotos( productLike['images']);
+
+      final response = await dio.request(
+        url,
+        data: productLike,
+        options: Options(
+          method: method
+        )
+      );
+
+      final product = ProductMapper.jsonToEntity(response.data);
+      return product;
+
+    } on DioException catch (e) {
+
+      logger.e('Error guardando producto: ${e.response?.statusCode} ${e.response?.data}');
+      throw Exception(e);
+
+    } catch (e) {
+
+      logger.e(e);
+      throw Exception();
+
+    }
+
   }
 
   @override
